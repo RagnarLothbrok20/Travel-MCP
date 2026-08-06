@@ -20,13 +20,15 @@ async function startHttp() {
     if (req.url !== "/mcp") { res.writeHead(404).end(); return; }
     const sessionId = req.headers["mcp-session-id"];
     let transport = sessionId ? sessions.get(sessionId) : undefined;
-    if (!transport && req.method === "POST") {
-      transport = new StreamableHTTPServerTransport({ sessionIdGenerator: () => crypto.randomUUID() });
-      transport.onclose = () => sessions.delete(transport.sessionId);
+    if (!transport && !sessionId && req.method === "POST") {
+      transport = new StreamableHTTPServerTransport({
+        sessionIdGenerator: () => crypto.randomUUID(),
+        onsessioninitialized: (newSessionId) => sessions.set(newSessionId, transport),
+        onsessionclosed: (closedSessionId) => sessions.delete(closedSessionId)
+      });
       await createMcpServer().connect(transport);
-      sessions.set(transport.sessionId, transport);
     }
-    if (!transport) { res.writeHead(400).end("Missing or invalid MCP session"); return; }
+    if (!transport) { res.writeHead(404).end("Missing or invalid MCP session"); return; }
     await transport.handleRequest(req, res);
   });
   httpServer.listen(port, () => console.log(`Dummy Travel MCP listening at http://localhost:${port}/mcp`));
