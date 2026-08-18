@@ -23,6 +23,10 @@ function database() {
   return pool;
 }
 
+export function isDatabaseConfigured() {
+  return Boolean(process.env.DATABASE_URL);
+}
+
 function toFlight(row) {
   return { id: row.id, airline: row.airline, flight_number: row.flight_number, origin: row.origin, destination: row.destination, departure_time: row.departure_time, arrival_time: row.arrival_time, duration: row.duration, stops: row.stops, cabin_class: row.cabin_class, price: { amount: row.price_amount, currency: row.price_currency } };
 }

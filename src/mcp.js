@@ -29,7 +29,7 @@ export function createMcpServer() {
       origin: z.string().min(3).describe("Departure airport or city, e.g. MAA or Chennai"),
       destination: z.string().min(3).describe("Arrival airport or city, e.g. DXB or Dubai"),
       departure_date: date,
-      cabin_class: z.enum(["economy", "any"]).optional().default("economy"),
+      cabin_class: z.enum(["economy", "business", "first", "any"]).optional().default("economy"),
       passengers: z.number().int().min(1).max(9).optional().default(1)
     },
     async (input) => {

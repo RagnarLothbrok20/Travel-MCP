@@ -2,7 +2,7 @@ import http from "node:http";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createMcpServer } from "./mcp.js";
-import { initializeFlightStore } from "./flights.js";
+import { initializeFlightStore, isDatabaseConfigured } from "./flights.js";
 
 async function startStdio() {
   await initializeFlightStore();
@@ -17,7 +17,7 @@ async function startHttp() {
   const httpServer = http.createServer(async (req, res) => {
     if (req.url === "/health" && req.method === "GET") {
       res.writeHead(200, { "content-type": "application/json" });
-      res.end(JSON.stringify({ status: "ok", service: "dummy-travel-mcp" }));
+      res.end(JSON.stringify({ status: "ok", service: "dummy-travel-mcp", database_configured: isDatabaseConfigured() }));
       return;
     }
     if (req.url !== "/mcp") { res.writeHead(404).end(); return; }
