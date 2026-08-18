@@ -11,8 +11,11 @@ test("MCP client can discover and call search_flights", async () => {
   await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
   const tools = await client.listTools();
   assert.ok(tools.tools.some((tool) => tool.name === "search_flights"));
+  assert.ok(tools.tools.some((tool) => tool.name === "create_flight"));
+  assert.ok(tools.tools.some((tool) => tool.name === "update_flight"));
+  assert.ok(tools.tools.some((tool) => tool.name === "delete_flight"));
   const response = await client.callTool({ name: "search_flights", arguments: { origin: "Chennai", destination: "Dubai", departure_date: "2026-08-07" } });
-  assert.match(response.content[0].text, /Emirates/);
+  assert.equal(response.structuredContent.result_count, 3);
   const hotelResponse = await client.callTool({ name: "search_hotels", arguments: { city: "Dubai", check_in: "2026-08-07", check_out: "2026-08-10" } });
   assert.match(hotelResponse.content[0].text, /Palm Horizon/);
   const tripResponse = await client.callTool({ name: "start_trip", arguments: { destination: "Dubai", traveler_name: "Viswa" } });

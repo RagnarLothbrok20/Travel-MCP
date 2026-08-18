@@ -29,3 +29,46 @@ export function searchFlights({ origin, destination, departure_date, cabin_class
     disclaimer: "Mock data only. Prices and availability are not real and cannot be booked."
   };
 }
+
+function requireFlight(flightId) {
+  const flight = flights.find((item) => item.id === flightId);
+  if (!flight) throw new Error("Flight " + flightId + " was not found.");
+  return flight;
+}
+
+export function createFlight({
+  airline, flight_number, origin, destination, departure_time, arrival_time,
+  duration, stops, cabin_class, price_amount, price_currency
+}) {
+  const flight = {
+    id: "TRV-" + crypto.randomUUID().slice(0, 8).toUpperCase(),
+    airline, flight_number, origin: normalizeAirport(origin), destination: normalizeAirport(destination),
+    departure_time, arrival_time, duration, stops, cabin_class,
+    price: { amount: price_amount, currency: price_currency.toUpperCase() }
+  };
+  flights.push(flight);
+  return { created: true, flight, disclaimer: "Mock data only. This does not create a real airline inventory record." };
+}
+
+export function updateFlight({ flight_id, ...changes }) {
+  const flight = requireFlight(flight_id);
+  const entries = Object.entries(changes).filter(([, value]) => value !== undefined);
+  if (!entries.length) throw new Error("Provide at least one field to update.");
+  for (const [key, value] of entries) {
+    if (key === "origin" || key === "destination") flight[key] = normalizeAirport(value);
+    else if (key === "price_amount") flight.price.amount = value;
+    else if (key === "price_currency") flight.price.currency = value.toUpperCase();
+    else flight[key] = value;
+  }
+  return { updated: true, flight, disclaimer: "Mock data only. This does not update a real airline inventory record." };
+}
+
+export function deleteFlight({ flight_id, confirmation }) {
+  if (confirmation !== "DELETE") {
+    return { deleted: false, message: "No flight was deleted. Repeat with confirmation set to DELETE." };
+  }
+  const index = flights.findIndex((item) => item.id === flight_id);
+  if (index === -1) throw new Error("Flight " + flight_id + " was not found.");
+  const [flight] = flights.splice(index, 1);
+  return { deleted: true, flight, disclaimer: "Mock data only. This does not delete a real airline inventory record." };
+}
