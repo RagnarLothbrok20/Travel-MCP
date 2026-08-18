@@ -33,7 +33,7 @@ export function createMcpServer() {
       passengers: z.number().int().min(1).max(9).optional().default(1)
     },
     async (input) => {
-      const result = searchFlights(input);
+      const result = await searchFlights(input);
       return response(result);
     }
   );
@@ -41,7 +41,7 @@ export function createMcpServer() {
     "create_flight",
     "Create a mock flight record and return its generated flight ID. This never changes real airline inventory.",
     flightFields,
-    async (input) => response(createFlight(input))
+    async (input) => response(await createFlight(input))
   );
   server.tool(
     "update_flight",
@@ -60,7 +60,7 @@ export function createMcpServer() {
       price_amount: flightFields.price_amount.optional(),
       price_currency: flightFields.price_currency.optional()
     },
-    async (input) => response(updateFlight(input))
+    async (input) => response(await updateFlight(input))
   );
   server.tool(
     "delete_flight",
@@ -69,7 +69,7 @@ export function createMcpServer() {
       flight_id: z.string().min(1),
       confirmation: z.literal("DELETE").describe("Must be exactly DELETE to remove the mock flight.")
     },
-    async (input) => response(deleteFlight(input))
+    async (input) => response(await deleteFlight(input))
   );
   server.tool("search_hotels", "Search mock hotels. Results are dummy data only and cannot be booked.", {
     city: z.string().min(3), check_in: date, check_out: date, guests: z.number().int().min(1).max(9).optional().default(1)

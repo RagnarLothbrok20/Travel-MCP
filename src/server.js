@@ -2,13 +2,16 @@ import http from "node:http";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createMcpServer } from "./mcp.js";
+import { initializeFlightStore } from "./flights.js";
 
 async function startStdio() {
+  await initializeFlightStore();
   const server = createMcpServer();
   await server.connect(new StdioServerTransport());
 }
 
 async function startHttp() {
+  await initializeFlightStore();
   const port = Number(process.env.PORT ?? 3000);
   const sessions = new Map();
   const httpServer = http.createServer(async (req, res) => {
